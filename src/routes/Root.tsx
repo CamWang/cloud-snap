@@ -24,7 +24,7 @@ function Root() {
           defaultSelectedKeys={['1']}
           items={menuItems} />
       </Header>
-      <Content style={{ alignSelf: 'center', maxWidth: 990, minWidth: 890  }}>
+      <Content style={{ alignSelf: 'center', maxWidth: 990, minWidth: 890, overflowY: 'scroll'  }}>
         <Outlet />
       </Content>
       <Footer style={{ textAlign: 'center' }}>Monash University ©2023 Created by Clayton A2 Group 23</Footer>

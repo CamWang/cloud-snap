@@ -4,16 +4,11 @@ import type { UploadProps } from 'antd';
 import { message, Upload, Button, Input, Space, InputNumber } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
+import { QueryDataType } from './types';
 
 const { Dragger } = Upload;
 
 const { Title, Text } = Typography;
-
-type QueryDataType = {
-  tag: string;
-  value: number;
-  key: number;
-}
 
 function Home() {
   const [messageApi, contextHolder] = message.useMessage();
