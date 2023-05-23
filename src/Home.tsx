@@ -19,7 +19,7 @@ function Home() {
 
   const [queryData, setQueryData] = useState<QueryDataType[]>([]);
   const [tag, setTag] = useState<string>('');
-  const [value, setValue] = useState<number>(0);
+  const [value, setValue] = useState<number>(1);
   const addQueryData = () => {
     let fail = false;
     if (!tag || !value) {
