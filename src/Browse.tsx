@@ -41,7 +41,7 @@ function Browse() {
       </div>
       <div className='grid' style={{padding: 16, width: '100%'}}>
         {
-          [...Array(15).keys()].map((item) => (
+          [...Array(15).keys()].map(() => (
             <Card
               hoverable
               style={{ width: 240 }}
