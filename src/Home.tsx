@@ -1,18 +1,79 @@
 import { theme, Tabs, Typography } from 'antd'
 import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { message, Upload } from 'antd';
+import { message, Upload, Button, Input, Space, InputNumber } from 'antd';
+import Table, { ColumnsType } from 'antd/es/table';
+import { useMemo, useState } from 'react';
 
 const { Dragger } = Upload;
 
 const { Title, Text } = Typography;
 
+type QueryDataType = {
+  tag: string;
+  value: number;
+  key: number;
+}
+
 function Home() {
+  const [messageApi, contextHolder] = message.useMessage();
+
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+
+  const [queryData, setQueryData] = useState<QueryDataType[]>([]);
+  const [tag, setTag] = useState<string>('');
+  const [value, setValue] = useState<number>(0);
+  const addQueryData = () => {
+    let fail = false;
+    if (!tag || !value) {
+      fail = true;
+      messageApi.open({
+        type: 'error',
+        content: 'Please fill in the tag name and least amount',
+      });
+    }
+    if (queryData.some((item) => item.tag == tag)) {
+      fail = true;
+      messageApi.open({
+        type: 'error',
+        content: 'Tag name already exists',
+      });
+    }
+    if (!fail) {
+      setQueryData([...queryData, { tag, value, key: queryData.length}]);
+    }
+  };
+
+  const columns: ColumnsType<QueryDataType> = useMemo(() => [
+    {
+      title: 'Tag',
+      dataIndex: 'tag',
+      key: 'tag',
+      render: (tag: string) => <span>{tag}</span>,
+    },
+    {
+      title: 'Value',
+      dataIndex: 'value',
+      key: 'value',
+      render: (value: number) => <span>{value}</span>,
+    }, {
+      title: 'Remove',
+      dataIndex: 'key',
+      key: 'key',
+      render: (key: number) => (
+        <Button type='primary' danger onClick={() => {
+          setQueryData(queryData.filter((item) => item.key != key));
+        }}>Delete</Button>
+      ),
+    }
+  ], [queryData]);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: 16, marginTop: 24 }}>
+    <>
+      {contextHolder}
+      <div style={{ display: 'flex', flexDirection: 'column', padding: 16, marginTop: 24 }}>
       <div style={{display: 'flex', marginBottom: 16}}>
         <img src='/cloudsnap.png' style={{ width: 64, height: 64, marginRight: 20 }} />
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -38,19 +99,37 @@ function Home() {
                   banned files.
                 </p>
               </Dragger>
+              <Button type='primary' style={{width: 100, marginTop: 24}}>Search</Button>
             </div>
           ),
         },{
           key: '2',
           label: 'Search By Tags',
           children: (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 16 }}>
-              <Text>Coming Soon</Text>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: colorBgContainer, padding: 16 }}>
+              <Space direction='vertical'>
+                <Space.Compact style={{width: '100%'}}>
+                  <Table style={{width: '100%'}} columns={columns} dataSource={queryData} />
+                </Space.Compact>
+                <Space.Compact style={{marginTop: 16}}>
+                  <Input onChange={(e) => {
+                    setTag(e.target.value);
+                  }} style={{ width: '60%' }} placeholder='Tag Name' />
+                  <InputNumber min={1} max={20} defaultValue={1} onChange={(value: number | null) => {
+                    setValue(value?value:0);
+                  }} style={{ width: '40%' }} placeholder='Least Amount' />
+                  <Button type='primary' onClick={addQueryData}>Add</Button>
+                </Space.Compact>
+                <Space style={{width: '100%', display: 'flex', justifyContent: 'center', marginTop: 24}}>
+                  <Button type='primary' style={{width: 100}}>Search</Button>
+                </Space>
+              </Space>
             </div>
           ),
         }]}
       />
     </div>
+    </>
   )
 }
 

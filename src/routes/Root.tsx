@@ -1,5 +1,5 @@
 import { Layout, Menu } from 'antd'
-import { Content, Header } from 'antd/es/layout/layout'
+import { Content, Header, Footer } from 'antd/es/layout/layout'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useCallback } from 'react'
 
@@ -27,6 +27,7 @@ function Root() {
       <Content style={{ alignSelf: 'center', maxWidth: 990, minWidth: 890  }}>
         <Outlet />
       </Content>
+      <Footer style={{ textAlign: 'center' }}>Monash University ©2023 Created by Clayton A2 Group 23</Footer>
     </Layout>
   )
 }
