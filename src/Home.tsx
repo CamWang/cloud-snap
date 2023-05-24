@@ -4,7 +4,7 @@ import type { UploadProps } from 'antd';
 import { message, Upload, Button, Input, Space, InputNumber } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
-import { QueryDataType } from './types';
+import { TagDataType } from './types';
 
 const { Dragger } = Upload;
 
@@ -17,7 +17,7 @@ function Home() {
     token: { colorBgContainer },
   } = theme.useToken();
 
-  const [queryData, setQueryData] = useState<QueryDataType[]>([]);
+  const [tagData, setQueryData] = useState<TagDataType[]>([]);
   const [tag, setTag] = useState<string>('');
   const [value, setValue] = useState<number>(1);
   const addQueryData = () => {
@@ -29,7 +29,7 @@ function Home() {
         content: 'Please fill in the tag name and least amount',
       });
     }
-    if (queryData.some((item) => item.tag == tag)) {
+    if (tagData.some((item) => item.tag == tag)) {
       fail = true;
       messageApi.open({
         type: 'error',
@@ -37,11 +37,11 @@ function Home() {
       });
     }
     if (!fail) {
-      setQueryData([...queryData, { tag, value, key: queryData.length}]);
+      setQueryData([...tagData, { tag, value, key: tagData.length}]);
     }
   };
 
-  const columns: ColumnsType<QueryDataType> = useMemo(() => [
+  const columns: ColumnsType<TagDataType> = useMemo(() => [
     {
       title: 'Tag',
       dataIndex: 'tag',
@@ -59,11 +59,11 @@ function Home() {
       key: 'key',
       render: (key: number) => (
         <Button type='primary' danger onClick={() => {
-          setQueryData(queryData.filter((item) => item.key != key));
+          setQueryData(tagData.filter((item) => item.key != key));
         }}>Delete</Button>
       ),
     }
-  ], [queryData]);
+  ], [tagData]);
 
   return (
     <>
@@ -83,7 +83,7 @@ function Home() {
           key: '1',
           label: 'Search By Image',
           children: (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
               <Dragger {...uploadProps}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
@@ -104,7 +104,7 @@ function Home() {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: colorBgContainer, padding: 16 }}>
               <Space direction='vertical'>
                 <Space.Compact style={{width: '100%'}}>
-                  <Table style={{width: '100%'}} columns={columns} dataSource={queryData} />
+                  <Table style={{width: '100%'}} columns={columns} dataSource={tagData} />
                 </Space.Compact>
                 <Space.Compact style={{marginTop: 16}}>
                   <Input onChange={(e) => {
