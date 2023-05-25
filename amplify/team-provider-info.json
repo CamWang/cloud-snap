@@ -1,0 +1,30 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-cloudsnap-dev-163437-authRole",
+      "UnauthRoleArn": "arn:aws:iam::257006854664:role/amplify-cloudsnap-dev-163437-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::257006854664:role/amplify-cloudsnap-dev-163437-authRole",
+      "Region": "ap-southeast-2",
+      "DeploymentBucketName": "amplify-cloudsnap-dev-163437-deployment",
+      "UnauthRoleName": "amplify-cloudsnap-dev-163437-unauthRole",
+      "StackName": "amplify-cloudsnap-dev-163437",
+      "StackId": "arn:aws:cloudformation:ap-southeast-2:257006854664:stack/amplify-cloudsnap-dev-163437/38ec9210-fac6-11ed-bd13-0207931ffbd0",
+      "AmplifyAppId": "d1ecgjbj30kmsa",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-cloudsnap-dev-163437-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    },
+    "categories": {
+      "function": {
+        "testApiLambda": {
+          "deploymentBucketName": "amplify-cloudsnap-dev-163437-deployment",
+          "s3Key": "amplify-builds/testApiLambda-75434d396f4a78432f44-build.zip"
+        }
+      },
+      "auth": {
+        "cloudsnap": {}
+      },
+      "api": {
+        "testApi": {}
+      }
+    }
+  }
+}

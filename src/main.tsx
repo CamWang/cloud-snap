@@ -10,6 +10,10 @@ import ErrorPage from './routes/ErrorPage'
 import Home from './Home'
 import Browse from './Browse'
 
+import { Amplify } from 'aws-amplify';
+import awsExports from './aws-exports';
+Amplify.configure(awsExports);
+
 const router = createBrowserRouter([
   {
     path: '/',
