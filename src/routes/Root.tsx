@@ -1,6 +1,7 @@
-import { Layout, Menu } from 'antd'
+import { Avatar, Dropdown, Layout, Menu, MenuProps } from 'antd'
 import { Content, Header, Footer } from 'antd/es/layout/layout'
 import { Outlet, useNavigate } from 'react-router-dom'
+import { UserOutlined } from '@ant-design/icons'
 import { useCallback } from 'react'
 
 function Root() {
@@ -23,6 +24,9 @@ function Root() {
           mode='horizontal'
           defaultSelectedKeys={['1']}
           items={menuItems} />
+        <Dropdown menu={{items}} placement='bottomRight' arrow>
+          <Avatar style={{background: '#eee'}} shape="square" size={42} icon={<UserOutlined />} />
+        </Dropdown>
       </Header>
       <Content style={{ alignSelf: 'center', maxWidth: 990, minWidth: 890, overflow: 'hidden'  }}>
         <Outlet />
@@ -41,5 +45,16 @@ const menuItems = [{
   label: 'Browse',
   href: '/browse'
 }]
+
+const items: MenuProps['items'] = [
+  {
+    key: '1',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+        Logout
+      </a>
+    ),
+  }
+];
 
 export default Root;
