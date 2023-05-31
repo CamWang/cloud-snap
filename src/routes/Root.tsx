@@ -3,6 +3,7 @@ import { Content, Header, Footer } from 'antd/es/layout/layout'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { UserOutlined } from '@ant-design/icons'
 import { useCallback } from 'react'
+import { Auth } from 'aws-amplify'
 
 function Root() {
   const navigate = useNavigate();
@@ -50,7 +51,9 @@ const items: MenuProps['items'] = [
   {
     key: '1',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+      <a target="_self" href="#" onClick={ async () => {
+        await Auth.signOut();
+      }}>
         Logout
       </a>
     ),
