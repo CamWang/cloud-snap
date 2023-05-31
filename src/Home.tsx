@@ -81,17 +81,16 @@ function Home() {
         type="card"
         items={[{
           key: '1',
-          label: 'Search By Image',
+          label: 'Upload Image',
           children: (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
-              <Dragger {...uploadProps}>
+              <Dragger {...uploadProps} style={{width: 400}}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">Click or drag file to this area to upload</p>
                 <p className="ant-upload-hint">
-                  Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-                  banned files.
+                  One Image At A Time, 5MB Max
                 </p>
               </Dragger>
               <Button type='primary' style={{width: 100, marginTop: 24}}>Search</Button>
@@ -99,14 +98,31 @@ function Home() {
           ),
         },{
           key: '2',
+          label: 'Search By Image',
+          children: (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
+              <Dragger {...uploadProps} style={{width: 400}}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                <p className="ant-upload-hint">
+                One Image At A Time, 5MB Max
+                </p>
+              </Dragger>
+              <Button type='primary' style={{width: 100, marginTop: 24}}>Search</Button>
+            </div>
+          ),
+        },{
+          key: '3',
           label: 'Search By Tags',
           children: (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: colorBgContainer, padding: 16 }}>
               <Space direction='vertical'>
-                <Space.Compact style={{width: '100%'}}>
-                  <Table style={{width: '100%'}} columns={columns} dataSource={tagData} />
+                <Space.Compact style={{width: 500}}>
+                  <Table style={{width: 500}} columns={columns} dataSource={tagData} />
                 </Space.Compact>
-                <Space.Compact style={{marginTop: 16}}>
+                <Space.Compact style={{marginTop: 16, display: 'flex'}}>
                   <Input onChange={(e) => {
                     setTag(e.target.value);
                   }} style={{ width: '60%' }} placeholder='Tag Name' />

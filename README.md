@@ -1,6 +1,6 @@
 # cloud-snap
 A Serverless Image Storage with Tagging  
-[CloudSnap](https://main.d1k88z9uknwv0j.amplifyapp.com/)
+[CloudSnap](https://main.d1ecgjbj30kmsa.amplifyapp.com/)
 ## Development
 Tech Stack:
 - React

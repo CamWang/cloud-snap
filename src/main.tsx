@@ -12,6 +12,8 @@ import Browse from './Browse'
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './aws-exports';
+import '@aws-amplify/ui-react/styles.css';
+import { withAuthenticator } from '@aws-amplify/ui-react'
 Amplify.configure(awsExports);
 
 const router = createBrowserRouter([
@@ -32,8 +34,16 @@ const router = createBrowserRouter([
   }
 ])
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
-)
+function App() {
+  return (
+    <>
+      <React.StrictMode>
+        <RouterProvider router={router} />
+      </React.StrictMode>
+    </>
+  )
+}
+
+const AuthApp = withAuthenticator(App)
+
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<AuthApp />);
