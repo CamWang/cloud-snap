@@ -1,20 +1,5 @@
 {
-  "api": {
-    "testApi": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "testApiLambda"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "API Gateway"
-    }
-  },
+  "api": {},
   "auth": {
     "cloudsnap": {
       "dependsOn": [],
@@ -43,14 +28,7 @@
       "serviceType": "managed"
     }
   },
-  "function": {
-    "testApiLambda": {
-      "build": true,
-      "dependsOn": [],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    }
-  },
+  "function": {},
   "hosting": {
     "amplifyhosting": {
       "lastPushTimeStamp": "2023-05-31T05:15:41.634Z",
@@ -59,22 +37,6 @@
     }
   },
   "parameters": {
-    "AMPLIFY_function_testApiLambda_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "testApiLambda"
-        }
-      ]
-    },
-    "AMPLIFY_function_testApiLambda_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "testApiLambda"
-        }
-      ]
-    },
     "AMPLIFY_hosting_amplifyhosting_appId": {
       "usedBy": [
         {

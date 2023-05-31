@@ -78,20 +78,11 @@
       "auth": {
         "cloudsnap": {}
       },
-      "function": {
-        "testApiLambda": {
-          "deploymentBucketName": "amplify-cloudsnap-cloud-153040-deployment",
-          "s3Key": "amplify-builds/testApiLambda-75434d396f4a78432f44-build.zip"
-        }
-      },
       "hosting": {
         "amplifyhosting": {
           "appId": "d17h87lmq4osj1",
           "type": "cicd"
         }
-      },
-      "api": {
-        "testApi": {}
       }
     }
   }
