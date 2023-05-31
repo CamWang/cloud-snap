@@ -59,6 +59,22 @@
     }
   },
   "parameters": {
+    "AMPLIFY_function_testApiLambda_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "testApiLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_testApiLambda_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "testApiLambda"
+        }
+      ]
+    },
     "AMPLIFY_hosting_amplifyhosting_appId": {
       "usedBy": [
         {
