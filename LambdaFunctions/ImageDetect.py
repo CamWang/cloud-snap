@@ -7,7 +7,6 @@ import time
 import cv2
 import os
 import json
-import mysql.connector
 
 confthres = 0.3
 nmsthres = 0.1
@@ -120,40 +119,6 @@ def process_image(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
 
-
-def lambda_handler(event, context):
-    image = base64.b64decode(event["body"]["image"])
-    s3_bucket = boto3.client("s3")
-    label_path = s3_bucket.get_object(
-        Bucket="yolo-config-bucket-group23",
-        key="coco.names"
-    )
-    config_path = s3_bucket.get_object(
-        Bucket="yolo-config-bucket-group23",
-        key="yolov3-tiny.cfg"
-    )
-    weight_path = s3_bucket.get_object(
-        Bucket="yolo-config-bucket-group23",
-        key="yolov3-tiny.weights"
-    )
-    Lables = get_labels(label_path)
-    CFG = get_config(config_path)
-    Weights = get_weights(weight_path)
-    nets = load_model(CFG, Weights)
-    try:
-        image = process_image(image)
-        response = f"{event['body']['filename']}"
-        label_count = do_prediction(image, nets, Lables, response)
-        #TODO RETRIEVE URL FROM S3
-
-    except Exception as e:
-        print("Exception  {}".format(e))
-        return {
-            "statusCode": 500,
-            "body": "Internal server error 2"
-        }
-
-
 def insert_detect_result_to_DB(label_count, image_url):
     dynamoDB = boto3.resource("dynamoDB")
     table_name = "image_tags"
@@ -165,3 +130,39 @@ def insert_detect_result_to_DB(label_count, image_url):
             "url": image_url
         }
     )
+    
+def lambda_handler(event, context):
+    s3_client = boto3.client("s3")
+    label_path = s3_client.get_object(
+        Bucket="yolo-config-bucket-group23",
+        key="coco.names"
+    )
+    config_path = s3_client.get_object(
+        Bucket="yolo-config-bucket-group23",
+        key="yolov3-tiny.cfg"
+    )
+    weight_path = s3_client.get_object(
+        Bucket="yolo-config-bucket-group23",
+        key="yolov3-tiny.weights"
+    )
+    Lables = get_labels(label_path)
+    CFG = get_config(config_path)
+    Weights = get_weights(weight_path)
+    nets = load_model(CFG, Weights)
+    try:
+        #TODO: RETRIEVE IMAGE FROM EVENT
+        #image = ?
+        image = base64.b64decode(event["body"]["image"])
+        image = process_image(image)
+        response = f"{event['body']['filename']}"
+        label_count = do_prediction(image, nets, Lables, response)
+        #TODO:RETRIEVE URL FROM EVENT
+        #image_url = ?
+        insert_detect_result_to_DB(label_count, image_url)
+
+    except Exception as e:
+        print("Exception  {}".format(e))
+        return {
+            "statusCode": 500,
+            "body": "Internal server error"
+        }
