@@ -160,6 +160,7 @@ def insert_detect_result_to_DB(label_count, image_url):
     table = dynamoDB.Table(table_name)
     table.put_item(
         Item={
+            "partition": "image",
             "tags": label_count,
             "url": image_url
         }
