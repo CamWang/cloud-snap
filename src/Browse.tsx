@@ -1,4 +1,4 @@
-import { Button, Card, Input, InputNumber, Modal, Space, Tag, Typography, message } from 'antd'
+import { Button, Card, Input, InputNumber, Modal, Space, Typography, message } from 'antd'
 import { TagDataType } from './types';
 import Meta from 'antd/es/card/Meta';
 import { EditOutlined } from '@ant-design/icons';
