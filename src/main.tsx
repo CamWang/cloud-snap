@@ -14,6 +14,9 @@ import { Amplify } from 'aws-amplify';
 import awsExports from './aws-exports';
 import '@aws-amplify/ui-react/styles.css';
 import { withAuthenticator } from '@aws-amplify/ui-react'
+
+
+
 Amplify.configure(awsExports);
 
 const router = createBrowserRouter([
