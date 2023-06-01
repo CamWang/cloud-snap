@@ -85,5 +85,32 @@
         }
       }
     }
+  },
+  "cloudsnaps": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-cloudsnap-cloudsnaps-125153-authRole",
+      "UnauthRoleArn": "arn:aws:iam::257006854664:role/amplify-cloudsnap-cloudsnaps-125153-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::257006854664:role/amplify-cloudsnap-cloudsnaps-125153-authRole",
+      "Region": "ap-southeast-2",
+      "DeploymentBucketName": "amplify-cloudsnap-cloudsnaps-125153-deployment",
+      "UnauthRoleName": "amplify-cloudsnap-cloudsnaps-125153-unauthRole",
+      "StackName": "amplify-cloudsnap-cloudsnaps-125153",
+      "StackId": "arn:aws:cloudformation:ap-southeast-2:257006854664:stack/amplify-cloudsnap-cloudsnaps-125153/43b47ad0-0027-11ee-9fe6-06432df3e3c4",
+      "AmplifyAppId": "d17h87lmq4osj1"
+    },
+    "categories": {
+      "auth": {
+        "cloudsnap": {}
+      },
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d17h87lmq4osj1",
+          "type": "cicd"
+        }
+      },
+      "storage": {
+        "s3images": {}
+      }
+    }
   }
 }
