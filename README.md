@@ -18,3 +18,4 @@ npm run dev
 - Find image by detection result of another image
 - Manual adjust the image
 - Delete the image
+
