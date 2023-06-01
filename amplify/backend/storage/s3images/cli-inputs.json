@@ -1,0 +1,12 @@
+{
+  "resourceName": "s3images",
+  "policyUUID": "05dbcb83",
+  "bucketName": "cloudsnap-images",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
