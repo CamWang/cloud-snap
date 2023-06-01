@@ -2,11 +2,15 @@ import { theme, Tabs, Typography } from 'antd'
 import { InboxOutlined } from '@ant-design/icons';
 import { message, Upload, Button, Input, Space, InputNumber } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useContext } from 'react';
 import { TagDataType } from './types';
 import type { UploadRequestOption} from 'rc-upload/lib/interface';
-import { Storage } from 'aws-amplify';
+import { Storage, API } from 'aws-amplify';
+import { ImagesContext } from './context/ImagesContext';
+import { useNavigate } from 'react-router-dom';
 
+const apiName = 'CloudSnap API';
+const path = '/search/tag';
 
 const { Dragger } = Upload;
 
@@ -14,6 +18,7 @@ const { Title, Text } = Typography;
 
 function Home() {
   const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
 
   const {
     token: { colorBgContainer },
@@ -22,6 +27,7 @@ function Home() {
   const [tagData, setQueryData] = useState<TagDataType[]>([]);
   const [tag, setTag] = useState<string>('');
   const [value, setValue] = useState<number>(1);
+  const {setImages} = useContext(ImagesContext);
   const addQueryData = () => {
     let fail = false;
     if (!tag || !value) {
@@ -42,6 +48,41 @@ function Home() {
       setQueryData([...tagData, { tag, value, key: tagData.length}]);
     }
   };
+
+  const searchByTags = useCallback(() => {
+    if (tagData.length == 0) {
+      messageApi.open({
+        type: 'error',
+        content: 'Please add at least one tag',
+      });
+      return;
+    }
+    const tags = tagData.map((item) => ({
+      tag: item.tag,
+      count: item.value,
+    }));
+    const myInit = {
+      body: {
+        tags: tags
+      }
+    };
+    API.post(apiName, path, myInit)
+      .then((response) => {
+        if (response.length == 0) {
+          messageApi.open({
+            type: 'error',
+            content: 'No images found',
+          });
+          return;
+        }
+        setImages?.(response.map((item:string) => item.split('/')[1]));
+        setQueryData([]);
+        navigate('/browse');
+      })
+      .catch((error) => {
+        console.log(error.response);
+      });
+  }, [messageApi, navigate, setImages, tagData]);
 
   const columns: ColumnsType<TagDataType> = useMemo(() => [
     {
@@ -91,7 +132,7 @@ function Home() {
         },
       });
     }
-  }, []);
+  }, [messageApi]);
   
   const searchRequest = useCallback((options: UploadRequestOption) => {
     const { onSuccess, onError, file, onProgress } = options;
@@ -118,7 +159,7 @@ function Home() {
         },
       });
     }
-  }, []);
+  }, [messageApi]);
 
   return (
     <>
@@ -186,7 +227,7 @@ function Home() {
                   <Button type='primary' onClick={addQueryData}>Add</Button>
                 </Space.Compact>
                 <Space style={{width: '100%', display: 'flex', justifyContent: 'center', marginTop: 24}}>
-                  <Button type='primary' style={{width: 100}}>Search</Button>
+                  <Button type='primary' onClick={searchByTags} style={{width: 100}}>Search</Button>
                 </Space>
               </Space>
             </div>

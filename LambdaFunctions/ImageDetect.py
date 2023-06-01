@@ -63,10 +63,12 @@ def process_image(image):
 def insert_detect_result_to_DB(label_count, key, url):
     table_name = "image_tags"
     table = dynamoDB.Table(table_name)
+    tags = [{"tag": key, "count": value} for key, value in label_count.items()]
+    print(tags)
     table.put_item(
         Item={
             "partition": "image",
-            "tags": label_count,
+            "tags": tags,
             "key": key,
             "url": url
         }

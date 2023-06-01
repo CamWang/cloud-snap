@@ -12,3 +12,9 @@ To run development server:
 npm install
 npm run dev
 ```
+## Usage
+- Auto detect objects in uploaded images
+- Find image by object name and amount
+- Find image by detection result of another image
+- Manual adjust the image
+- Delete the image
