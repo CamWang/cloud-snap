@@ -3,38 +3,75 @@ import { TagDataType } from './types';
 import Meta from 'antd/es/card/Meta';
 import { EditOutlined } from '@ant-design/icons';
 import Table, { ColumnsType } from 'antd/es/table';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { Storage } from 'aws-amplify';
 
 const {Text} = Typography;
 
-const testTagData: TagDataType[] = [
-  {
-    tag: 'tag1',
-    value: 1,
-    key: 0
-  }, {
-    tag: 'tag2',
-    value: 2,
-    key: 1
-  }, {
-    tag: 'tag3',
-    value: 2,
-    key: 2
-  }
-]
+// const testTagData: TagDataType[] = [
+//   {
+//     tag: 'tag1',
+//     value: 1,
+//     key: 0
+//   }, {
+//     tag: 'tag2',
+//     value: 2,
+//     key: 1
+//   }, {
+//     tag: 'tag3',
+//     value: 2,
+//     key: 2
+//   }
+// ]
+
+type ImageDataType = {
+  key: string;
+  url: string;
+}
 
 function Browse() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const [open, setOpen] = useState<boolean>(false);
-  const showModal = () => setOpen(true);
+  const showModal = () => {
+    setOpen(true)
+  };
   const hideModel = () => setOpen(false);
 
-  const [tagData, setTagData] = useState<TagDataType[]>(testTagData);
+  const [tagData, setTagData] = useState<TagDataType[]>([]);
   const [editTag, setEditTag] = useState<TagDataType | null>(null);
 
   const [tag, setTag] = useState<string>('');
   const [value, setValue] = useState<number>(1);
+
+  const [images, setImages] = useState<ImageDataType[]>([]);
+  
+  useEffect(() => {
+    Storage.list('')
+      .then(({ results }) => {
+        const imagePromises = results.map(async (item) => {
+          if (item.key) {
+            const url = await Storage.get(item.key, { level: 'public' });
+            return {
+              key: item.key,
+              url: url,
+            };
+          }
+          return null;
+        });
+  
+        Promise.all(imagePromises)
+          .then((imageList) => {
+            setImages(imageList.filter(image => image !== null) ? imageList.filter(image => image !== null) as ImageDataType[] : []);
+          });
+      })
+      .catch(() => {
+        messageApi.open({
+          type: 'error',
+          content: 'Failed to load images',
+        })
+      });
+  }, [messageApi]);
 
   const addTagData = () => {
     let fail = false;
@@ -128,9 +165,9 @@ function Browse() {
         <Text style={{marginRight: 12, fontWeight: 'bold'}}>Filters: </Text>
         <Space size={[0, 8]} wrap>
           {
-            testTagData.map((item) => (
+            tagData.map((item) => (
               <Tag color='blue' key={item.tag} style={{padding:8}} closable onClose={() => {
-                testTagData.splice(item.key, 1);
+                tagData.splice(item.key, 1);
               }}>{item.tag} - {item.value}</Tag>
             ))
           }
@@ -138,18 +175,20 @@ function Browse() {
       </div>
       <div className='grid' style={{padding: 16, width: '100%', height: '100%'}}>
         {
-          [...Array(15).keys()].map((key) => (
+          images.map((obj) => (
             <Card
               hoverable
-              key={key}
-              style={{ width: 240 }}
+              key={obj.key}
+              style={{ width: 240, height: 300 }}
               bodyStyle={{backgroundColor: '#fff'}}
-              cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
+              cover={<img alt="example" src={obj.url} />}
               actions={[
-                <EditOutlined key="edit" onClick={showModal} />,
+                <EditOutlined key="edit" onClick={() => {
+                  showModal();
+                }} />,
               ]}
             >
-              <Meta title="Europe Street beat" description="www.instagram.com" />
+              <Meta title={obj.key} />
             </Card>
           ))
         }

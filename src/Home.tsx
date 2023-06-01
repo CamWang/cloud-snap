@@ -1,10 +1,12 @@
 import { theme, Tabs, Typography } from 'antd'
 import { InboxOutlined } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
 import { message, Upload, Button, Input, Space, InputNumber } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { TagDataType } from './types';
+import type { UploadRequestOption} from 'rc-upload/lib/interface';
+import { Storage } from 'aws-amplify';
+
 
 const { Dragger } = Upload;
 
@@ -65,6 +67,59 @@ function Home() {
     }
   ], [tagData]);
 
+  const uploadRequest = useCallback((options: UploadRequestOption) => {
+    const { onSuccess, onError, file, onProgress  } = options;
+    if (file instanceof File) {
+      Storage.put(file.name, file, {
+        resumable: true,
+        progressCallback(progress) {
+          onProgress?.({ percent: progress.loaded / progress.total * 100 });
+        },
+        completeCallback: (event) => {
+          onSuccess?.(event);
+          messageApi.open({
+            type: 'success',
+            content: 'Upload Successfully',
+          });
+        },
+        errorCallback: (err) => {
+          onError?.(err);
+          messageApi.open({
+            type: 'error',
+            content: 'Upload Failed',
+          });
+        },
+      });
+    }
+  }, []);
+  
+  const searchRequest = useCallback((options: UploadRequestOption) => {
+    const { onSuccess, onError, file, onProgress } = options;
+    if (file instanceof File) {
+      Storage.put(file.name, file, {
+        resumable: true,
+        level: 'private',
+        progressCallback(progress) {
+          onProgress?.({ percent: progress.loaded / progress.total * 100 });
+        },
+        completeCallback: (event) => {
+          onSuccess?.(event);
+          messageApi.open({
+            type: 'success',
+            content: 'Upload Successfully',
+          });
+        },
+        errorCallback: (err) => {
+          onError?.(err);
+          messageApi.open({
+            type: 'error',
+            content: 'Upload Failed',
+          });
+        },
+      });
+    }
+  }, []);
+
   return (
     <>
       {contextHolder}
@@ -84,7 +139,7 @@ function Home() {
           label: 'Upload Image',
           children: (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
-              <Dragger {...uploadProps} style={{width: 400}}>
+              <Dragger customRequest={uploadRequest} style={{width: 400}}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
@@ -93,7 +148,6 @@ function Home() {
                   One Image At A Time, 5MB Max
                 </p>
               </Dragger>
-              <Button type='primary' style={{width: 100, marginTop: 24}}>Search</Button>
             </div>
           ),
         },{
@@ -101,7 +155,7 @@ function Home() {
           label: 'Search By Image',
           children: (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
-              <Dragger {...uploadProps} style={{width: 400}}>
+              <Dragger customRequest={searchRequest} style={{width: 400}}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
@@ -144,24 +198,5 @@ function Home() {
   )
 }
 
-const uploadProps: UploadProps = {
-  name: 'file',
-  multiple: true,
-  action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-  onDrop(e) {
-    console.log('Dropped files', e.dataTransfer.files);
-  },
-};
 
 export default Home;
