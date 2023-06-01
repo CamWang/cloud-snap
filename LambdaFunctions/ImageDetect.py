@@ -1,12 +1,9 @@
 import boto3
-import base64
-from botocore.exceptions import NoCredentialsError
 import numpy as np
 from urllib.parse import unquote_plus
 import cv2
-import uuid
 
-confthres = 0.3
+confthres = 0.1
 
 s3 = boto3.client("s3")
 dynamoDB = boto3.resource("dynamodb")
@@ -17,7 +14,6 @@ with open("/opt/coco.names", "r") as f:
 
 def do_prediction(image, net, LABELS):
     (H, W) = image.shape[:2]
-    print(H, W)
     ln = net.getLayerNames()
     layers = [ln[i - 1] for i in net.getUnconnectedOutLayers()]
     blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416),
@@ -39,7 +35,6 @@ def do_prediction(image, net, LABELS):
     for i in range(len(classIDs)):
         labels.append(LABELS[classIDs[i]])
             
-    print(labels)
     label_count = count_label(labels)
     return label_count
 
@@ -64,7 +59,6 @@ def insert_detect_result_to_DB(label_count, key, url):
     table_name = "image_tags"
     table = dynamoDB.Table(table_name)
     tags = [{"tag": key, "count": value} for key, value in label_count.items()]
-    print(tags)
     table.put_item(
         Item={
             "partition": "image",
@@ -79,13 +73,11 @@ def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8').replace(' ', '/')
     url = f"https://{bucket}.s3.amazonaws.com/{key}"
-    print(key)
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
         image = response['Body'].read()
         image = process_image(image)
         label_count = do_prediction(image, nets, labels)
-        print("label_count: ", label_count)
         insert_detect_result_to_DB(label_count, key, url)
     except Exception as e:
         print(e)

@@ -17,5 +17,4 @@ def lambda_handler(event, context):
                     keys.append(item['key']['S'])
                     break  # This will break the innermost loop, moving to the next item
     
-    print(f"keys = {keys}")
     return keys

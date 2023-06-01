@@ -10,11 +10,21 @@ import { ImagesContext } from './context/ImagesContext';
 import { useNavigate } from 'react-router-dom';
 
 const apiName = 'CloudSnap API';
-const path = '/search/tag';
+const tagPath = '/search/tag';
+const imagePath = '/search/image'
 
 const { Dragger } = Upload;
 
 const { Title, Text } = Typography;
+
+function fileToBase64(file: File) {
+  return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(file);
+  });
+}
 
 function Home() {
   const [messageApi, contextHolder] = message.useMessage();
@@ -66,7 +76,7 @@ function Home() {
         tags: tags
       }
     };
-    API.post(apiName, path, myInit)
+    API.post(apiName, tagPath, myInit)
       .then((response) => {
         if (response.length == 0) {
           messageApi.open({
@@ -134,32 +144,31 @@ function Home() {
     }
   }, [messageApi]);
   
-  const searchRequest = useCallback((options: UploadRequestOption) => {
-    const { onSuccess, onError, file, onProgress } = options;
+  const searchRequest = useCallback(async (options: UploadRequestOption) => {
+    const { onSuccess, onError, file } = options;
     if (file instanceof File) {
-      Storage.put(file.name, file, {
-        resumable: true,
-        level: 'private',
-        progressCallback(progress) {
-          onProgress?.({ percent: progress.loaded / progress.total * 100 });
-        },
-        completeCallback: (event) => {
-          onSuccess?.(event);
-          messageApi.open({
-            type: 'success',
-            content: 'Upload Successfully',
-          });
-        },
-        errorCallback: (err) => {
-          onError?.(err);
+      const base64File = await fileToBase64(file);
+      API.post(apiName, imagePath, {
+        body: {
+          image: base64File
+        }
+      }).then(response => {
+        onSuccess?.(response);
+        if (response.length == 0) {
           messageApi.open({
             type: 'error',
-            content: 'Upload Failed',
+            content: 'No images found',
           });
-        },
+          return;
+        }
+        setImages?.(response.map((item:string) => item.split('/')[1]));
+        navigate('/browse');
+      }).catch((error) => {
+        console.log(error.response);
+        onError?.(error);
       });
     }
-  }, [messageApi]);
+  }, [messageApi, navigate, setImages]);
 
   return (
     <>
@@ -205,7 +214,6 @@ function Home() {
                 One Image At A Time, 5MB Max
                 </p>
               </Dragger>
-              <Button type='primary' style={{width: 100, marginTop: 24}}>Search</Button>
             </div>
           ),
         },{
