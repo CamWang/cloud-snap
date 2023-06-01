@@ -4,7 +4,8 @@ import boto3
 
 
 def lambda_handler(event, context):
-    tags = event["tags"]
+    request_body = json.loads(event["body"])
+    tags = request_body["tags"]
     #print(f"tags={tags}")
 
     dynamoDB = boto3.client("dynamoDB")
@@ -26,7 +27,8 @@ def lambda_handler(event, context):
         url = item["url"]["S"]
         urls.append(url)
     
-    print(f"urls = urls")
+    print(f"urls = {urls}")
+
 
 
     
