@@ -59,9 +59,11 @@ const getTagDataDifference = (
 
 function Browse() {
   const [messageApi, contextHolder] = message.useMessage({ maxCount: 1,  top: 64, duration: 2});
+  const [modelTableLoading, setModelTableLoading] = useState<boolean>(false);
 
   const [open, setOpen] = useState<boolean>(false);
   const showModal = useCallback((key: string) => {
+    setModelTableLoading(true);
     setCurrentImage(key);
     API.get(apiName, imagePath, {
       queryStringParameters: {
@@ -82,10 +84,12 @@ function Browse() {
       })
       .catch((error) => {
         console.log(error.response);
+      }).finally(() => {
+        setModelTableLoading(false);
       });
     setOpen(true);
   }, [messageApi]);
-  
+
   const hideModel = () => {
     setOpen(false);
   };
@@ -373,6 +377,7 @@ function Browse() {
       >
         <Table
           style={{ width: "100%", marginTop: 24 }}
+          loading={modelTableLoading}
           columns={columns}
           dataSource={tagData.map((item) => {
             return { ...item, key: item.tag };
