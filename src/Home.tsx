@@ -3,11 +3,16 @@ import { InboxOutlined } from '@ant-design/icons';
 import { message, Upload, Button, Input, Space, InputNumber } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
 import { useMemo, useState, useCallback, useContext } from 'react';
-import { TagDataType } from './types';
 import type { UploadRequestOption} from 'rc-upload/lib/interface';
 import { Storage, API } from 'aws-amplify';
 import { ImagesContext } from './context/ImagesContext';
 import { useNavigate } from 'react-router-dom';
+
+type TagDataType = {
+  key: number;
+  tag: string;
+  value: number;
+};
 
 const apiName = 'CloudSnap API';
 const tagPath = '/search/tag';
