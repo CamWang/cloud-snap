@@ -1,15 +1,13 @@
 import boto3
-import base64
-from botocore.exceptions import NoCredentialsError
 import numpy as np
 from urllib.parse import unquote_plus
 import cv2
-import uuid
+import base64
 
-confthres = 0.3
+confthres = 0.1
 
-s3 = boto3.client("s3")
-dynamoDB = boto3.resource("dynamodb")
+dynamoDB = boto3.client("dynamodb")
+
 labels = []
 
 with open("/opt/coco.names", "r") as f:
@@ -17,7 +15,6 @@ with open("/opt/coco.names", "r") as f:
 
 def do_prediction(image, net, LABELS):
     (H, W) = image.shape[:2]
-    print(H, W)
     ln = net.getLayerNames()
     layers = [ln[i - 1] for i in net.getUnconnectedOutLayers()]
     blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416),
@@ -39,7 +36,6 @@ def do_prediction(image, net, LABELS):
     for i in range(len(classIDs)):
         labels.append(LABELS[classIDs[i]])
             
-    print(labels)
     label_count = count_label(labels)
     return label_count
 
@@ -52,55 +48,29 @@ def count_label(labels):
         else:
             label_count[label] += 1
     return label_count
-
-
-def process_image(image):
-    image = np.frombuffer(image, np.uint8)
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    return image
-
-def query_by_tags(label_count):
-    tags = label_count
-
-    dynamoDB = boto3.client("dynamoDB")
-    table_name = "image_tags"
-    condition_expression = ' AND '.join(['tags.M.#{}.#N >= :{}'.format(tag['tag'], tag['count']) for tag in tags])
-    expression_attribute_names = {'#{}'.format(tag['tag']): tag['tag'] for tag in tags}
-    expression_attribute_values = {':{}'.format(tag['count']): {'N': str(tag['count'])} for tag in tags}
-
-    response = dynamoDB.scan(
-    TableName=table_name,
-    FilterExpression=condition_expression,
-    ExpressionAttributeNames=expression_attribute_names,
-    ExpressionAttributeValues=expression_attribute_values
-    )
-
-    urls = []
-    items = response["Items"]
-    for item in items:
-        url = item["url"]["S"]
-        urls.append(url)
-
-    #print(f"urls = {urls}")
-
-    return urls
-    
-    
     
 def lambda_handler(event, context):
     nets = cv2.dnn.readNetFromDarknet("/opt/yolov3-tiny.cfg", "/opt/yolov3-tiny.weights")
-    bucket = event['Records'][0]['s3']['bucket']['name']
-    key = unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8').replace(' ', '/')
-    url = f"https://{bucket}.s3.amazonaws.com/{key}"
-    print(key)
-    try:
-        response = s3.get_object(Bucket=bucket, Key=key)
-        image = response['Body'].read()
-        image = process_image(image)
-        label_count = do_prediction(image, nets, labels)
-        urls = query_by_tags(label_count)
-        #print("label_count: ", label_count)
-    except Exception as e:
-        print(e)
+    base64_image = event['image']
+    
+    # CRITICAL Remove the base64 header
+    if "," in base64_image:
+        base64_image = base64_image.split(",")[1]
+    
+    decoded_image = base64.b64decode(base64_image)
+    numpy_arr = np.frombuffer(decoded_image, np.uint8)
+    image = cv2.imdecode(numpy_arr, cv2.IMREAD_COLOR)
+    
+    label_count = do_prediction(image, nets, labels)
+    response = dynamoDB.scan(TableName='image_tags')
+    items = response['Items']
+    keys = []
+    for item in items: #数据可中的每个数据
+        for tag in item['tags']['L']: #数据库中每个数据的tag list中的所有tag
+            for targetTag, count in label_count.items():
+                if tag['M']['tag']['S'] == targetTag and tag['M']['count']['N'] >= str(count):
+                    keys.append(item['key']['S'])
+                    break
+    
+    return keys
     
