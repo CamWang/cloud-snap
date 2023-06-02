@@ -1,4 +1,3 @@
-import json
 import boto3
 
 def get_target_item(items, item_key):
@@ -11,20 +10,31 @@ def get_target_item(items, item_key):
 def modify_item(modify_type, target_item, new_tag_list):
     if int(modify_type) == 1:
         for old_tag in target_item["tags"]["L"]:
-            for new_tag in new_tag_list["tags"]:
+            for new_tag in new_tag_list:
                 if new_tag["tag"] == old_tag["M"]["tag"]["S"]:
-                    old_tag["M"]["count"]["N"] = int(old_tag["M"]["count"]["N"]) + int(new_tag["count"])
+                    if hasattr(new_tag, "count"):
+                        old_tag["M"]["count"]["N"] = int(old_tag["M"]["count"]["N"]) + int(new_tag["count"])
+                    else:
+                        new_tag["count"] == 1
+                        old_tag["M"]["count"]["N"] = int(old_tag["M"]["count"]["N"]) + 1
                     return target_item
     
     if int(modify_type) == 0:
+        updated_tag_list = []
         for old_tag in target_item["tags"]["L"]:
-            for new_tag in new_tag_list["tags"]:
+            for new_tag in new_tag_list:
                 if new_tag["tag"] == old_tag["M"]["tag"]["S"]:
                     if int(old_tag["M"]["count"]["N"]) > int(new_tag["count"]):
                         old_tag["M"]["count"]["N"] = int(old_tag["M"]["count"]["N"]) - int(new_tag["count"])
                     else:
                         old_tag["M"]["count"]["N"] = 0
-                        return target_item
+
+        for old_tag in target_item["tags"]["L"]:
+            if int(old_tag["M"]["count"]["N"]) != 0:
+                updated_tag_list.append(old_tag)
+        
+        target_item["tags"]["L"] = updated_tag_list
+        return target_item
 
 
 def lambda_handler(event, context):
