@@ -298,7 +298,7 @@ function Browse() {
                   setEditTag(null);
                 }}
               >
-                Save
+                Done
               </Button>
             ) : (
               <Button
