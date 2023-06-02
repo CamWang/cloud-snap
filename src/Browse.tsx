@@ -5,10 +5,13 @@ import {
   Modal,
   Typography,
   message,
+  Space,
+  Input,
+  
 } from "antd";
 import { TagDataType } from "./types";
 import Meta from "antd/es/card/Meta";
-import { EditOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import Table, { ColumnsType } from "antd/es/table";
 import { useState, useMemo, useEffect, useContext, useCallback } from "react";
 import { Storage, API } from "aws-amplify";
@@ -90,15 +93,15 @@ function Browse() {
   const [initalTagData, setInitalTagData] = useState<TagDataType[]>([]);
   const [editTag, setEditTag] = useState<TagDataType | null>(null);
 
-  // const [tag, setTag] = useState<string>('');
-  // const [value, setValue] = useState<number>(1);
+  const [tag, setTag] = useState<string>('');
+  const [value, setValue] = useState<number>(1);
 
   const [currentImage, setCurrentImage] = useState<string>("");
   const [currentImages, setCurrentImages] = useState<ImageDataType[]>([]);
 
   const { images } = useContext(ImagesContext);
 
-  const fetchImages = (results: (string | undefined)[]) => {
+  const fetchImages = useCallback((results: (string | undefined)[]) => {
     const imagePromises = results.map(async (key) => {
       if (key) {
         const url = await Storage.get(key, { level: "public" });
@@ -117,7 +120,27 @@ function Browse() {
           : []
       );
     });
-  };
+  }, [])
+
+  const deleteImage = useCallback(
+    (key: string) => {
+      API.del(apiName, imagePath, {
+        body: {
+          key: `public/${key}`,
+        },
+      })
+        .then(() => {
+          messageApi.open({
+            type: "success",
+            content: "Image deleted",
+          });
+        })
+        .catch((error) => {
+          console.log(error.response);
+        });
+    },
+    [messageApi]
+  );
 
   useEffect(() => {
     if (images.length > 0) {
@@ -139,7 +162,7 @@ function Browse() {
           });
         });
     }
-  }, [images, messageApi]);
+  }, [fetchImages, images, messageApi]);
 
   const submitChange = useCallback(() => {
     const diffTags = getTagDataDifference(tagData, initalTagData);
@@ -182,26 +205,26 @@ function Browse() {
     }
   }, [tagData, initalTagData, currentImage, messageApi]);
 
-  // const addTagData = () => {
-  //   let fail = false;
-  //   if (!tag || !value) {
-  //     fail = true;
-  //     messageApi.open({
-  //       type: 'error',
-  //       content: 'Please fill in the tag name and least amount',
-  //     });
-  //   }
-  //   if (tagData.some((item) => item.tag == tag)) {
-  //     fail = true;
-  //     messageApi.open({
-  //       type: 'error',
-  //       content: 'Tag name already exists',
-  //     });
-  //   }
-  //   if (!fail) {
-  //     setTagData([...tagData, { tag: tag, count: value}]);
-  //   }
-  // };
+  const addTagData = () => {
+    let fail = false;
+    if (!tag || !value) {
+      fail = true;
+      messageApi.open({
+        type: 'error',
+        content: 'Please fill in the tag name and least amount',
+      });
+    }
+    if (tagData.some((item) => item.tag == tag)) {
+      fail = true;
+      messageApi.open({
+        type: 'error',
+        content: 'Tag name already exists',
+      });
+    }
+    if (!fail) {
+      setTagData([...tagData, { tag: tag, count: value}]);
+    }
+  };
 
   const columns: ColumnsType<TagDataType> = useMemo(
     () => [
@@ -293,14 +316,14 @@ function Browse() {
           padding: 16,
           width: "100%",
           height: "100%",
-          gridTemplateRows: "320px 300px",
+          gridTemplateRows: "320px 500px",
         }}
       >
         {currentImages.map((obj) => (
           <Card
             hoverable
             key={obj.key}
-            style={{ width: 240, height: 300 }}
+            style={{ width: 240, height: 320 }}
             bodyStyle={{ backgroundColor: "#fff" }}
             cover={<img alt="example" src={obj.url} />}
             actions={[
@@ -308,6 +331,13 @@ function Browse() {
                 key="edit"
                 onClick={() => {
                   showModal(obj.key);
+                }}
+              />,
+              <DeleteOutlined
+              twoToneColor="#f44336"
+                key="delete"
+                onClick={() => {
+                  deleteImage(obj.key);
                 }}
               />,
             ]}
@@ -333,7 +363,7 @@ function Browse() {
           })}
         />
         <Text style={{ marginTop: 12 }}>Add New Tag</Text>
-        {/* <Space.Compact style={{width: '100%', paddingBottom: 12, paddingTop: 12}}>
+        <Space.Compact style={{width: '100%', paddingBottom: 12, paddingTop: 12}}>
           <Input onChange={(e) => {
               setTag(e.target.value);
             }} style={{ width: '60%' }} placeholder='Tag Name' />
@@ -341,7 +371,7 @@ function Browse() {
             setValue(value?value:0);
           }} placeholder='Least Amount' />
           <Button type='primary' onClick={addTagData}>Add</Button>
-        </Space.Compact> */}
+        </Space.Compact>
       </Modal>
     </div>
   );

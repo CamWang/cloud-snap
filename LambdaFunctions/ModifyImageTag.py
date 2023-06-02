@@ -11,17 +11,27 @@ def get_target_item(items, item_key):
 def modify_item(modify_type, target_item, new_tag_list):
     if int(modify_type) == 1:
         for new_tag in new_tag_list:
-            for old_tag in target_item["tags"]["L"]:
+            exist = False
+            for old_tag in target_item["tags"]["L"]:  
                 if new_tag["tag"] == old_tag["M"]["tag"]["S"]:
+                    exist = True
                     if "count" in new_tag:
                         old_tag["M"]["count"]["N"] = str(int(old_tag["M"]["count"]["N"]) + int(new_tag["count"]))
                     else:
                         new_tag["count"] == 1
                         old_tag["M"]["count"]["N"] = str(int(old_tag["M"]["count"]["N"]) + 1)
                     return target_item
-                else:
-
-
+            if not exist:
+                target_item["tags"]["L"].append({
+                    "M": {
+                        "tag": {
+                            "S": new_tag["tag"]
+                        },
+                        "count": {
+                            "N": str(new_tag["count"])
+                        }
+                    }
+                })
     
     if int(modify_type) == 0:
         updated_tag_list = []
@@ -59,5 +69,3 @@ def lambda_handler(event, context):
         TableName = "image_tags",
         Item = new_item
     )
-
-
