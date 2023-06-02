@@ -64,13 +64,15 @@ def lambda_handler(event, context):
     label_count = do_prediction(image, nets, labels)
     response = dynamoDB.scan(TableName='image_tags')
     items = response['Items']
-    keys = []
-    for item in items: #数据可中的每个数据
-        for tag in item['tags']['L']: #数据库中每个数据的tag list中的所有tag
+    result = []
+    for item in items:
+        for tag in item['tags']['L']:
             for targetTag, count in label_count.items():
                 if tag['M']['tag']['S'] == targetTag and tag['M']['count']['N'] >= str(count):
-                    keys.append(item['key']['S'])
+                    result.append({
+                        'key': item['key']['S'],
+                        'url': item['url']['S']
+                    })
                     break
     
-    return keys
-    
+    return result
