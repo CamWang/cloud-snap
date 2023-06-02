@@ -23,6 +23,7 @@ function Root() {
           style={{ display: 'flex', alignItems: 'center', flex: 1, justifyContent: 'center' }}
           theme='dark'
           mode='horizontal'
+          selectedKeys={[`${menuItems.filter(item => item.href == window.location.pathname)[0].key}`] || ["1"]}
           defaultSelectedKeys={['1']}
           items={menuItems} />
         <Dropdown menu={{items}} placement='bottomRight' arrow>

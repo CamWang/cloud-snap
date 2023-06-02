@@ -58,10 +58,10 @@ const getTagDataDifference = (
 };
 
 function Browse() {
-  const [messageApi, contextHolder] = message.useMessage({ maxCount: 1 });
+  const [messageApi, contextHolder] = message.useMessage({ maxCount: 1,  top: 64, duration: 2});
 
   const [open, setOpen] = useState<boolean>(false);
-  const showModal = (key: string) => {
+  const showModal = useCallback((key: string) => {
     setCurrentImage(key);
     API.get(apiName, imagePath, {
       queryStringParameters: {
@@ -84,7 +84,8 @@ function Browse() {
         console.log(error.response);
       });
     setOpen(true);
-  };
+  }, [messageApi]);
+  
   const hideModel = () => {
     setOpen(false);
   };
@@ -101,35 +102,64 @@ function Browse() {
 
   const { images } = useContext(ImagesContext);
 
-  const fetchImages = useCallback((results: (string | undefined)[]) => {
-    const imagePromises = results.map(async (key) => {
-      if (key) {
-        const url = await Storage.get(key, { level: "public" });
-        return {
-          key: key,
-          url: url,
-        };
+  const fetchImages = useCallback(async () => {
+    let results;
+    if (images.length > 0) {
+      results = images;
+    } else {
+      try {
+        const images = await Storage.list("");
+        results = images.results.map((item) => item.key);
+        messageApi.open({
+          type: "info",
+          content: "No tag filter specified, loading all images",
+        });
+      } catch (e) {
+        messageApi.open({
+          type: "error",
+          content: "Failed to load images",
+        });
       }
-      return null;
-    });
+    }
+    if (results) {
+      const imagePromises = results.map(async (key) => {
+        if (key) {
+          const url = await Storage.get(key, { level: "public" });
+          return {
+            key: key,
+            url: url,
+          };
+        }
+        return null;
+      });
+  
+      Promise.all(imagePromises).then((imageList) => {
+        setCurrentImages(
+          imageList.filter((image) => image !== null)
+            ? (imageList.filter((image) => image !== null) as ImageDataType[])
+            : []
+        );
+      });
+    }
+  }, [images, messageApi])
 
-    Promise.all(imagePromises).then((imageList) => {
-      setCurrentImages(
-        imageList.filter((image) => image !== null)
-          ? (imageList.filter((image) => image !== null) as ImageDataType[])
-          : []
-      );
-    });
-  }, [])
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
 
   const deleteImage = useCallback(
     (key: string) => {
+      messageApi.open({
+        type: "loading",
+        content: `Delete image ${key}`,
+      });
       API.del(apiName, imagePath, {
         body: {
           key: `public/${key}`,
         },
       })
         .then(() => {
+          fetchImages();
           messageApi.open({
             type: "success",
             content: "Image deleted",
@@ -139,30 +169,8 @@ function Browse() {
           console.log(error.response);
         });
     },
-    [messageApi]
+    [fetchImages, messageApi]
   );
-
-  useEffect(() => {
-    if (images.length > 0) {
-      fetchImages(images);
-    } else {
-      Storage.list("")
-        .then(({ results }) => {
-          const images = results.map((item) => item.key);
-          fetchImages(images);
-          messageApi.open({
-            type: "info",
-            content: "No tag filter specified, loading all images",
-          });
-        })
-        .catch(() => {
-          messageApi.open({
-            type: "error",
-            content: "Failed to load images",
-          });
-        });
-    }
-  }, [fetchImages, images, messageApi]);
 
   const submitChange = useCallback(() => {
     const diffTags = getTagDataDifference(tagData, initalTagData);
@@ -198,12 +206,13 @@ function Browse() {
             type: "success",
             content: "Image tags updated",
           });
+          showModal(currentImage);
         })
         .catch((error) => {
           console.log(error.response);
         });
     }
-  }, [tagData, initalTagData, currentImage, messageApi]);
+  }, [tagData, initalTagData, currentImage, messageApi, showModal]);
 
   const addTagData = () => {
     let fail = false;
@@ -264,7 +273,13 @@ function Browse() {
               type="primary"
               danger
               onClick={() => {
-                setTagData(tagData.filter((item) => item.tag != tag));
+                setTagData(tagData.map((item) => {
+                  if (item.tag == tag) {
+                    item = { ...item, count: 0 };
+                    return item;
+                  }
+                  return item;
+                }));
               }}
             >
               Delete
@@ -313,17 +328,18 @@ function Browse() {
       <div
         className="grid"
         style={{
-          padding: 16,
           width: "100%",
           height: "100%",
-          gridTemplateRows: "320px 500px",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, 1fr)",
+          gridGap: "10px",
+          padding: "10px",
         }}
       >
         {currentImages.map((obj) => (
           <Card
             hoverable
             key={obj.key}
-            style={{ width: 240, height: 320 }}
             bodyStyle={{ backgroundColor: "#fff" }}
             cover={<img alt="example" src={obj.url} />}
             actions={[
@@ -356,14 +372,14 @@ function Browse() {
         cancelText="Cancel"
       >
         <Table
-          style={{ width: "100%" }}
+          style={{ width: "100%", marginTop: 24 }}
           columns={columns}
           dataSource={tagData.map((item) => {
             return { ...item, key: item.tag };
           })}
         />
         <Text style={{ marginTop: 12 }}>Add New Tag</Text>
-        <Space.Compact style={{width: '100%', paddingBottom: 12, paddingTop: 12}}>
+        <Space.Compact style={{width: '100%', paddingBottom: 32, paddingTop: 12}}>
           <Input onChange={(e) => {
               setTag(e.target.value);
             }} style={{ width: '60%' }} placeholder='Tag Name' />

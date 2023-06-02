@@ -37,7 +37,7 @@
     "resourceName": "cloudsnap",
     "sharedId": "cefea551",
     "serviceName": "Cognito",
-    "useDefault": "manual",
+    "useDefault": "defaultSocial",
     "authRoleArn": {
       "Fn::GetAtt": [
         "AuthRole",
@@ -53,18 +53,21 @@
     "breakCircularDependency": true,
     "useEnabledMfas": true,
     "dependsOn": [],
-    "hostedUI": false,
+    "hostedUI": true,
     "userPoolGroupList": [],
-    "authProviders": [
-      "accounts.google.com"
-    ],
-    "thirdPartyAuth": true,
     "userPoolGroups": false,
     "adminQueries": false,
     "triggers": {},
     "parentStack": {
       "Ref": "AWS::StackId"
     },
-    "permissions": []
+    "permissions": [],
+    "hostedUIDomainName": "cloudsnap5881a62d-5881a62d",
+    "authProvidersUserPool": [
+      "Google"
+    ],
+    "hostedUIProviderMeta": "[{\"ProviderName\":\"Google\",\"authorize_scopes\":\"openid email profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"sub\"}}]",
+    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://main.d17h87lmq4osj1.amplifyapp.com/\"],\"LogoutURLs\":[\"https://main.d17h87lmq4osj1.amplifyapp.com/\"]}",
+    "authProviders": []
   }
 }

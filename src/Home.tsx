@@ -32,7 +32,7 @@ function fileToBase64(file: File) {
 }
 
 function Home() {
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage({ maxCount: 1,  top: 64, duration: 2});
   const navigate = useNavigate();
 
   const {
@@ -194,13 +194,16 @@ function Home() {
           label: 'Upload Image',
           children: (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
+              <p style={{marginBottom: 24}}>
+                Upload image for automatic tagging, your image will be stored in the cloud public to other user for future use.
+              </p>
               <Dragger customRequest={uploadRequest} style={{width: 400}}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">Click or drag file to this area to upload</p>
                 <p className="ant-upload-hint">
-                  One Image At A Time, 5MB Max
+                  5MB Max, Image Will Automatically Be Stored And Tagged
                 </p>
               </Dragger>
             </div>
@@ -210,13 +213,16 @@ function Home() {
           label: 'Search By Image',
           children: (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
+              <p style={{marginBottom: 24}}>
+                Search image by uploading an image, the image will not be stored in the cloud.
+              </p>
               <Dragger customRequest={searchRequest} style={{width: 400}}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">Click or drag file to this area to upload</p>
                 <p className="ant-upload-hint">
-                One Image At A Time, 5MB Max
+                  5MB Max, Image Will Not Be Stored
                 </p>
               </Dragger>
             </div>
@@ -225,7 +231,10 @@ function Home() {
           key: '3',
           label: 'Search By Tags',
           children: (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: colorBgContainer, padding: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: colorBgContainer, padding: 24 }}>
+              <p style={{marginBottom: 24}}>
+                Search image by tags, tags consists of object name and least amount of object in the image.
+              </p>
               <Space direction='vertical'>
                 <Space.Compact style={{width: 500}}>
                   <Table style={{width: 500}} columns={columns} dataSource={tagData} />

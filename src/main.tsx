@@ -16,8 +16,6 @@ import '@aws-amplify/ui-react/styles.css';
 import { withAuthenticator } from '@aws-amplify/ui-react'
 import { ImagesContext } from './context/ImagesContext'
 
-
-
 Amplify.configure({
   ...awsExports,
   API: {
