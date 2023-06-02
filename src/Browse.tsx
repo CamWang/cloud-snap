@@ -15,7 +15,7 @@ type ImageDataType = {
 }
 
 function Browse() {
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage({maxCount: 1});
 
   const [open, setOpen] = useState<boolean>(false);
   const showModal = () => {
@@ -60,6 +60,10 @@ function Browse() {
       .then(({ results }) => {
         const images = results.map((item) => item.key);
         fetchImages(images);
+        messageApi.open({
+          type: 'info',
+          content: 'No tag filter specified, loading all images',
+       });
       })
       .catch(() => {
         messageApi.open({
