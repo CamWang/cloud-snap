@@ -344,7 +344,7 @@ function Browse() {
           <Card
             hoverable
             key={obj.key}
-            style={{minHeight: 320, maxHeight: 450}}
+            style={{minHeight: 340, maxHeight: 450}}
             bodyStyle={{ backgroundColor: "#fff" }}
             cover={<img alt="example" src={obj.url} />}
             actions={[
