@@ -14,10 +14,21 @@ import { Amplify } from 'aws-amplify';
 import awsExports from './aws-exports';
 import '@aws-amplify/ui-react/styles.css';
 import { withAuthenticator } from '@aws-amplify/ui-react'
+import { ImagesContext } from './context/ImagesContext'
 
 
 
-Amplify.configure(awsExports);
+Amplify.configure({
+  ...awsExports,
+  API: {
+    endpoints: [
+      {
+        name: "CloudSnap API",
+        endpoint: "https://hrjm4jtixl.execute-api.ap-southeast-2.amazonaws.com/test"
+      }
+    ]
+  }
+});
 
 const router = createBrowserRouter([
   {
@@ -38,11 +49,14 @@ const router = createBrowserRouter([
 ])
 
 function App() {
+  const [images, setImages] = React.useState<string[]>([])
   return (
     <>
-      <React.StrictMode>
-        <RouterProvider router={router} />
-      </React.StrictMode>
+      <ImagesContext.Provider value={{images, setImages}}>
+        <React.StrictMode>
+          <RouterProvider router={router} />
+        </React.StrictMode>
+      </ImagesContext.Provider>
     </>
   )
 }

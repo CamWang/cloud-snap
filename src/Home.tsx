@@ -2,18 +2,33 @@ import { theme, Tabs, Typography } from 'antd'
 import { InboxOutlined } from '@ant-design/icons';
 import { message, Upload, Button, Input, Space, InputNumber } from 'antd';
 import Table, { ColumnsType } from 'antd/es/table';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useContext } from 'react';
 import { TagDataType } from './types';
 import type { UploadRequestOption} from 'rc-upload/lib/interface';
-import { Storage } from 'aws-amplify';
+import { Storage, API } from 'aws-amplify';
+import { ImagesContext } from './context/ImagesContext';
+import { useNavigate } from 'react-router-dom';
 
+const apiName = 'CloudSnap API';
+const tagPath = '/search/tag';
+const imagePath = '/search/image'
 
 const { Dragger } = Upload;
 
 const { Title, Text } = Typography;
 
+function fileToBase64(file: File) {
+  return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(file);
+  });
+}
+
 function Home() {
   const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
 
   const {
     token: { colorBgContainer },
@@ -22,6 +37,7 @@ function Home() {
   const [tagData, setQueryData] = useState<TagDataType[]>([]);
   const [tag, setTag] = useState<string>('');
   const [value, setValue] = useState<number>(1);
+  const {setImages} = useContext(ImagesContext);
   const addQueryData = () => {
     let fail = false;
     if (!tag || !value) {
@@ -42,6 +58,41 @@ function Home() {
       setQueryData([...tagData, { tag, value, key: tagData.length}]);
     }
   };
+
+  const searchByTags = useCallback(() => {
+    if (tagData.length == 0) {
+      messageApi.open({
+        type: 'error',
+        content: 'Please add at least one tag',
+      });
+      return;
+    }
+    const tags = tagData.map((item) => ({
+      tag: item.tag,
+      count: item.value,
+    }));
+    const myInit = {
+      body: {
+        tags: tags
+      }
+    };
+    API.post(apiName, tagPath, myInit)
+      .then((response) => {
+        if (response.length == 0) {
+          messageApi.open({
+            type: 'error',
+            content: 'No images found',
+          });
+          return;
+        }
+        setImages?.(response.map((item:string) => item.split('/')[1]));
+        setQueryData([]);
+        navigate('/browse');
+      })
+      .catch((error) => {
+        console.log(error.response);
+      });
+  }, [messageApi, navigate, setImages, tagData]);
 
   const columns: ColumnsType<TagDataType> = useMemo(() => [
     {
@@ -91,34 +142,33 @@ function Home() {
         },
       });
     }
-  }, []);
+  }, [messageApi]);
   
-  const searchRequest = useCallback((options: UploadRequestOption) => {
-    const { onSuccess, onError, file, onProgress } = options;
+  const searchRequest = useCallback(async (options: UploadRequestOption) => {
+    const { onSuccess, onError, file } = options;
     if (file instanceof File) {
-      Storage.put(file.name, file, {
-        resumable: true,
-        level: 'private',
-        progressCallback(progress) {
-          onProgress?.({ percent: progress.loaded / progress.total * 100 });
-        },
-        completeCallback: (event) => {
-          onSuccess?.(event);
-          messageApi.open({
-            type: 'success',
-            content: 'Upload Successfully',
-          });
-        },
-        errorCallback: (err) => {
-          onError?.(err);
+      const base64File = await fileToBase64(file);
+      API.post(apiName, imagePath, {
+        body: {
+          image: base64File
+        }
+      }).then(response => {
+        onSuccess?.(response);
+        if (response.length == 0) {
           messageApi.open({
             type: 'error',
-            content: 'Upload Failed',
+            content: 'No images found',
           });
-        },
+          return;
+        }
+        setImages?.(response.map((item:string) => item.split('/')[1]));
+        navigate('/browse');
+      }).catch((error) => {
+        console.log(error.response);
+        onError?.(error);
       });
     }
-  }, []);
+  }, [messageApi, navigate, setImages]);
 
   return (
     <>
@@ -164,7 +214,6 @@ function Home() {
                 One Image At A Time, 5MB Max
                 </p>
               </Dragger>
-              <Button type='primary' style={{width: 100, marginTop: 24}}>Search</Button>
             </div>
           ),
         },{
@@ -186,7 +235,7 @@ function Home() {
                   <Button type='primary' onClick={addQueryData}>Add</Button>
                 </Space.Compact>
                 <Space style={{width: '100%', display: 'flex', justifyContent: 'center', marginTop: 24}}>
-                  <Button type='primary' style={{width: 100}}>Search</Button>
+                  <Button type='primary' onClick={searchByTags} style={{width: 100}}>Search</Button>
                 </Space>
               </Space>
             </div>

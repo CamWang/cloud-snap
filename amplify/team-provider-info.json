@@ -100,7 +100,9 @@
     },
     "categories": {
       "auth": {
-        "cloudsnap": {}
+        "cloudsnap": {
+          "googleClientId": "1028245867540-fmju4tefala1e1rr91al6ogpjggqrtgm.apps.googleusercontent.com"
+        }
       },
       "hosting": {
         "amplifyhosting": {

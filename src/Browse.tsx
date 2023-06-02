@@ -1,28 +1,13 @@
-import { Button, Card, Input, InputNumber, Modal, Space, Tag, Typography, message } from 'antd'
+import { Button, Card, Input, InputNumber, Modal, Space, Typography, message } from 'antd'
 import { TagDataType } from './types';
 import Meta from 'antd/es/card/Meta';
 import { EditOutlined } from '@ant-design/icons';
 import Table, { ColumnsType } from 'antd/es/table';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useContext } from 'react';
 import { Storage } from 'aws-amplify';
+import { ImagesContext } from './context/ImagesContext';
 
 const {Text} = Typography;
-
-// const testTagData: TagDataType[] = [
-//   {
-//     tag: 'tag1',
-//     value: 1,
-//     key: 0
-//   }, {
-//     tag: 'tag2',
-//     value: 2,
-//     key: 1
-//   }, {
-//     tag: 'tag3',
-//     value: 2,
-//     key: 2
-//   }
-// ]
 
 type ImageDataType = {
   key: string;
@@ -30,7 +15,7 @@ type ImageDataType = {
 }
 
 function Browse() {
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage({maxCount: 1});
 
   const [open, setOpen] = useState<boolean>(false);
   const showModal = () => {
@@ -44,26 +29,41 @@ function Browse() {
   const [tag, setTag] = useState<string>('');
   const [value, setValue] = useState<number>(1);
 
-  const [images, setImages] = useState<ImageDataType[]>([]);
+  const [currentImages, setCurrentImages] = useState<ImageDataType[]>([]);
+
+  const {images} = useContext(ImagesContext);
+
+  const fetchImages = (results: (string | undefined)[]) => {
+    console.log(results)
+    const imagePromises = results.map(async (key) => {
+      if (key) {
+        const url = await Storage.get(key, { level: 'public' });
+        return {
+          key: key,
+          url: url,
+        };
+      }
+      return null;
+    });
+
+    Promise.all(imagePromises)
+      .then((imageList) => {
+        setCurrentImages(imageList.filter(image => image !== null) ? imageList.filter(image => image !== null) as ImageDataType[] : []);
+      });
+  }
   
   useEffect(() => {
-    Storage.list('')
+    if (images.length > 0) {
+      fetchImages(images);
+    } else {
+      Storage.list('')
       .then(({ results }) => {
-        const imagePromises = results.map(async (item) => {
-          if (item.key) {
-            const url = await Storage.get(item.key, { level: 'public' });
-            return {
-              key: item.key,
-              url: url,
-            };
-          }
-          return null;
-        });
-  
-        Promise.all(imagePromises)
-          .then((imageList) => {
-            setImages(imageList.filter(image => image !== null) ? imageList.filter(image => image !== null) as ImageDataType[] : []);
-          });
+        const images = results.map((item) => item.key);
+        fetchImages(images);
+        messageApi.open({
+          type: 'info',
+          content: 'No tag filter specified, loading all images',
+       });
       })
       .catch(() => {
         messageApi.open({
@@ -71,7 +71,8 @@ function Browse() {
           content: 'Failed to load images',
         })
       });
-  }, [messageApi]);
+    }
+  }, [images, messageApi]);
 
   const addTagData = () => {
     let fail = false;
@@ -161,21 +162,9 @@ function Browse() {
     <div style={{ display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', overflowY: 'scroll',
       height: '100%'}}>
       {contextHolder}
-      <div style={{ paddingTop: 84, paddingBottom: 24}}>
-        <Text style={{marginRight: 12, fontWeight: 'bold'}}>Filters: </Text>
-        <Space size={[0, 8]} wrap>
-          {
-            tagData.map((item) => (
-              <Tag color='blue' key={item.tag} style={{padding:8}} closable onClose={() => {
-                tagData.splice(item.key, 1);
-              }}>{item.tag} - {item.value}</Tag>
-            ))
-          }
-        </Space>
-      </div>
-      <div className='grid' style={{padding: 16, width: '100%', height: '100%'}}>
+      <div className='grid' style={{padding: 16, width: '100%', height: '100%', gridTemplateRows: '320px 300px'}}>
         {
-          images.map((obj) => (
+          currentImages.map((obj) => (
             <Card
               hoverable
               key={obj.key}

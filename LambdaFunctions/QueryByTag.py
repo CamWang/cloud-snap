@@ -1,38 +1,20 @@
-import json
-import os
 import boto3
 
 
 def lambda_handler(event, context):
-    request_body = json.loads(event["body"])
-    tags = request_body["tags"]
-    #print(f"tags={tags}")
+    tags = event['tags']
 
-    dynamoDB = boto3.client("dynamoDB")
-    table_name = "image_tags"
-    condition_expression = ' AND '.join(['tags.M.#{}.#N >= :{}'.format(tag['tag'], tag['count']) for tag in tags])
-    expression_attribute_names = {'#{}'.format(tag['tag']): tag['tag'] for tag in tags}
-    expression_attribute_values = {':{}'.format(tag['count']): {'N': str(tag['count'])} for tag in tags}
+    dynamoDB = boto3.client("dynamodb")
+    response = dynamoDB.scan(TableName='image_tags')
+    items = response['Items']
 
-    response = dynamoDB.scan(
-    TableName=table_name,
-    FilterExpression=condition_expression,
-    ExpressionAttributeNames=expression_attribute_names,
-    ExpressionAttributeValues=expression_attribute_values
-    )
-
-    urls = []
-    items = response["Items"]
+    keys = []
     for item in items:
-        url = item["url"]["S"]
-        urls.append(url)
+        # Check each tag in the item's tag list
+        for tag in item['tags']['L']:
+            for check_tag in tags:
+                if tag['M']['tag']['S'] == check_tag['tag'] and tag['M']['count']['N'] >= str(check_tag['count']):
+                    keys.append(item['key']['S'])
+                    break  # This will break the innermost loop, moving to the next item
     
-    print(f"urls = {urls}")
-
-
-
-    
-
-
-
-
+    return keys

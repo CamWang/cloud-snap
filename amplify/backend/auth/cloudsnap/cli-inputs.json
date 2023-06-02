@@ -37,7 +37,7 @@
     "resourceName": "cloudsnap",
     "sharedId": "cefea551",
     "serviceName": "Cognito",
-    "useDefault": "defaultSocial",
+    "useDefault": "manual",
     "authRoleArn": {
       "Fn::GetAtt": [
         "AuthRole",
@@ -53,14 +53,18 @@
     "breakCircularDependency": true,
     "useEnabledMfas": true,
     "dependsOn": [],
-    "hostedUI": true,
-    "hostedUIDomainName": "cloudsnap8a5aa8f4-8a5aa8f4",
-    "authProvidersUserPool": [
-      "Google"
-    ],
-    "hostedUIProviderMeta": "[{\"ProviderName\":\"Google\",\"authorize_scopes\":\"openid email profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"sub\"}}]",
-    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:5173/\"],\"LogoutURLs\":[\"http://localhost:5173/\"]}",
+    "hostedUI": false,
     "userPoolGroupList": [],
-    "authProviders": []
+    "authProviders": [
+      "accounts.google.com"
+    ],
+    "thirdPartyAuth": true,
+    "userPoolGroups": false,
+    "adminQueries": false,
+    "triggers": {},
+    "parentStack": {
+      "Ref": "AWS::StackId"
+    },
+    "permissions": []
   }
 }

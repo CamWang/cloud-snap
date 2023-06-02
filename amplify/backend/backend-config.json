@@ -15,9 +15,7 @@
         "signupAttributes": [
           "EMAIL"
         ],
-        "socialProviders": [
-          "GOOGLE"
-        ],
+        "socialProviders": [],
         "usernameAttributes": [],
         "verificationMechanisms": [
           "EMAIL"
@@ -37,6 +35,14 @@
     }
   },
   "parameters": {
+    "AMPLIFY_auth_cloudsnap_googleClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "cloudsnap"
+        }
+      ]
+    },
     "AMPLIFY_hosting_amplifyhosting_appId": {
       "usedBy": [
         {
