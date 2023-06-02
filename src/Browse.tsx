@@ -336,7 +336,7 @@ function Browse() {
           height: "100%",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, 1fr)",
-          gridGap: "10px",
+          gridGap: "18px",
           padding: "10px",
         }}
       >
@@ -344,7 +344,7 @@ function Browse() {
           <Card
             hoverable
             key={obj.key}
-            style={{minHeight: 340, maxHeight: 450}}
+            style={{minHeight: 360, maxHeight: 450}}
             bodyStyle={{ backgroundColor: "#fff" }}
             cover={<img alt="example" src={obj.url} />}
             actions={[
