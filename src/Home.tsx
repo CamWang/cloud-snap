@@ -65,6 +65,10 @@ function Home() {
   };
 
   const searchByTags = useCallback(() => {
+    messageApi.open({
+      type: 'loading',
+      content: 'Searching...',
+    });
     if (tagData.length == 0) {
       messageApi.open({
         type: 'error',
@@ -90,7 +94,7 @@ function Home() {
           });
           return;
         }
-        setImages?.(response.map((item:string) => item.split('/')[1]));
+        setImages?.(response.map((item:{key:string, url: string}) => item.key.split('/')[1]));
         setQueryData([]);
         navigate('/browse');
       })
@@ -150,6 +154,10 @@ function Home() {
   }, [messageApi]);
   
   const searchRequest = useCallback(async (options: UploadRequestOption) => {
+    messageApi.open({
+      type: 'loading',
+      content: 'Searching...',
+    });
     const { onSuccess, onError, file } = options;
     if (file instanceof File) {
       const base64File = await fileToBase64(file);
@@ -166,7 +174,7 @@ function Home() {
           });
           return;
         }
-        setImages?.(response.map((item:string) => item.split('/')[1]));
+        setImages?.(response.map((item:{key:string, url: string}) => item.key.split('/')[1]));
         navigate('/browse');
       }).catch((error) => {
         console.log(error.response);
