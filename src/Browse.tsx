@@ -109,7 +109,7 @@ function Browse() {
   const [currentImage, setCurrentImage] = useState<string>("");
   const [currentImages, setCurrentImages] = useState<ImageDataType[]>([]);
 
-  const { images } = useContext(ImagesContext);
+  const { images, setImages } = useContext(ImagesContext);
 
   const fetchImages = useCallback(async () => {
     let results;
@@ -331,9 +331,23 @@ function Browse() {
         alignItems: "center",
         overflowY: "scroll",
         height: "100%",
+        paddingTop: "20px",
       }}
     >
       {contextHolder}
+      {
+        images.length > 0 ? (
+          <Button style={{
+            marginTop: "24px",
+            marginBottom: "12px",
+          }} danger onClick={
+              () => {
+                setImages?.([]);
+                fetchImages();
+              }
+            }>Remove Filters</Button>
+        ) : null
+      }
       <div
         className="grid"
         style={{
