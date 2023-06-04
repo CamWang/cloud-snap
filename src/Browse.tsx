@@ -71,11 +71,12 @@ function Browse() {
       },
     })
       .then((response) => {
-        if (!response.tags) {
+        if (!response.tags || response.tags.length === 0) {
           messageApi.open({
-            type: "error",
-            content: "Error loading image tags or image have no tags",
+            type: "warning",
+            content: "Image have no tags",
           });
+          setTagData([]);
           return;
         } else {
           setTagData(response.tags);
@@ -84,6 +85,10 @@ function Browse() {
       })
       .catch((error) => {
         console.log(error.response);
+        messageApi.open({
+          type: "error",
+          content: "Failed to load image tags",
+        });
       }).finally(() => {
         setModelTableLoading(false);
       });
