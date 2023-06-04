@@ -8,6 +8,7 @@ confthres = 0.1
 s3 = boto3.client("s3")
 dynamoDB = boto3.resource("dynamodb")
 labels = []
+nets = cv2.dnn.readNetFromDarknet("/opt/yolov3-tiny.cfg", "/opt/yolov3-tiny.weights")
 
 with open("/opt/coco.names", "r") as f:
     labels = [name.strip() for name in f.readlines()]
@@ -69,7 +70,6 @@ def insert_detect_result_to_DB(label_count, key, url):
     )
     
 def lambda_handler(event, context):
-    nets = cv2.dnn.readNetFromDarknet("/opt/yolov3-tiny.cfg", "/opt/yolov3-tiny.weights")
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8').replace(' ', '/')
     url = f"https://{bucket}.s3.amazonaws.com/{key}"

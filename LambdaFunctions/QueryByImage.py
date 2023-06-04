@@ -5,9 +5,8 @@ import cv2
 import base64
 
 confthres = 0.1
-
 dynamoDB = boto3.client("dynamodb")
-
+nets = cv2.dnn.readNetFromDarknet("/opt/yolov3-tiny.cfg", "/opt/yolov3-tiny.weights")
 labels = []
 
 with open("/opt/coco.names", "r") as f:
@@ -50,7 +49,6 @@ def count_label(labels):
     return label_count
     
 def lambda_handler(event, context):
-    nets = cv2.dnn.readNetFromDarknet("/opt/yolov3-tiny.cfg", "/opt/yolov3-tiny.weights")
     base64_image = event['image']
     
     # CRITICAL Remove the base64 header
@@ -66,13 +64,17 @@ def lambda_handler(event, context):
     items = response['Items']
     result = []
     for item in items:
-        for tag in item['tags']['L']:
-            for targetTag, count in label_count.items():
-                if tag['M']['tag']['S'] == targetTag and tag['M']['count']['N'] >= str(count):
-                    result.append({
-                        'key': item['key']['S'],
-                        'url': item['url']['S']
-                    })
-                    break
+        # Check each tag in the item's tag list
+        tag_present_count = 0
+        for check_tag, count in label_count.items():
+            for tag in item['tags']['L']:
+                if tag['M']['tag']['S'] == check_tag and tag['M']['count']['N'] >= str(count):
+                    tag_present_count += 1
+                    
+        if tag_present_count == len(label_count):
+            result.append({
+                'key': item['key']['S'],
+                'url': item['url']['S']
+            })
     
     return result

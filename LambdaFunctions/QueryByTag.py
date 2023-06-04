@@ -11,13 +11,16 @@ def lambda_handler(event, context):
     result = []
     for item in items:
         # Check each tag in the item's tag list
-        for tag in item['tags']['L']:
-            for check_tag in tags:
+        tag_present_count = 0
+        for check_tag in tags:
+            for tag in item['tags']['L']:
                 if tag['M']['tag']['S'] == check_tag['tag'] and tag['M']['count']['N'] >= str(check_tag['count']):
-                    result.append({
-                        'key': item['key']['S'],
-                        'url': item['url']['S']
-                    })
-                    break  # This will break the innermost loop, moving to the next item
+                    tag_present_count += 1
+                    
+        if tag_present_count == len(tags):
+            result.append({
+                'key': item['key']['S'],
+                'url': item['url']['S']
+            })
     
     return result
