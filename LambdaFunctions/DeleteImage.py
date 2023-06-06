@@ -19,4 +19,5 @@ def lambda_handler(event, context):
     bucket_name = "cloudsnap-images125153-cloudsnaps"
     object_key = event["key"]
     s3.delete_object(Bucket = bucket_name, Key = object_key)
+    # yiwen 2.1
 
