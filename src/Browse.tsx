@@ -33,6 +33,8 @@ const getTagDataDifference = (
   tagData: TagDataType[],
   initalTagData: TagDataType[]
 ) => {
+  console.log("initial:", initalTagData);
+  console.log("current:", tagData);
   const tagsHasMoreCount = tagData.filter(
     (item) =>
       item.count >
@@ -77,6 +79,7 @@ function Browse() {
             content: "Image have no tags",
           });
           setTagData([]);
+          setInitalTagData([]);
           return;
         } else {
           setTagData(response.tags);
@@ -197,6 +200,7 @@ function Browse() {
             type: "success",
             content: "Image tags updated",
           });
+          showModal(currentImage);
         })
         .catch((error) => {
           console.log(error.response);
@@ -277,22 +281,6 @@ function Browse() {
         key: "key",
         render: (tag: string, record: TagDataType) => (
           <>
-            <Button
-              style={{ marginRight: 8 }}
-              type="primary"
-              danger
-              onClick={() => {
-                setTagData(tagData.map((item) => {
-                  if (item.tag == tag) {
-                    item = { ...item, count: 0 };
-                    return item;
-                  }
-                  return item;
-                }));
-              }}
-            >
-              Delete
-            </Button>
             {editTag?.tag === tag ? (
               <Button
                 type="primary"
@@ -307,7 +295,7 @@ function Browse() {
               </Button>
             ) : (
               <Button
-                type="primary"
+                type="default"
                 onClick={() => {
                   setEditTag(record);
                 }}
@@ -315,6 +303,22 @@ function Browse() {
                 Edit
               </Button>
             )}
+            <Button
+              style={{ marginLeft: 16 }}
+              type="default"
+              icon={<DeleteOutlined />}
+              danger
+              shape="circle"
+              onClick={() => {
+                setTagData(tagData.map((item) => {
+                  if (item.tag == tag) {
+                    item = { ...item, count: 0 };
+                    return item;
+                  }
+                  return item;
+                }));
+              }}
+            />
           </>
         ),
       },
