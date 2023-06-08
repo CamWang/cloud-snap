@@ -371,7 +371,7 @@ function Browse() {
             bodyStyle={{ backgroundColor: "#fff" }}
             cover={<img alt="example" src={obj.url} style={{
               height: "250px",
-              width: "270px",
+              width: "100%",
               objectFit: "cover",
             }} />}
             actions={[
