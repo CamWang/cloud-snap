@@ -369,7 +369,11 @@ function Browse() {
             key={obj.key}
             style={{minHeight: 360, maxHeight: 450}}
             bodyStyle={{ backgroundColor: "#fff" }}
-            cover={<img alt="example" src={obj.url} />}
+            cover={<img alt="example" src={obj.url} style={{
+              height: "250px",
+              width: "270px",
+              objectFit: "cover",
+            }} />}
             actions={[
               <EditOutlined
                 key="edit"

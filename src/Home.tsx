@@ -152,6 +152,16 @@ function Home() {
       });
     }
   }, [messageApi]);
+
+  const checkImage = ((file: File) => {
+    if (file.size > 2 * 1024 * 1024) {
+      messageApi.open({
+        type: 'error',
+        content: 'Image must smaller than 2MB!',
+      });
+      return Upload.LIST_IGNORE;
+    }
+  });
   
   const searchRequest = useCallback(async (options: UploadRequestOption) => {
     messageApi.open({
@@ -166,6 +176,15 @@ function Home() {
           image: base64File
         }
       }).then(response => {
+        console.log(response)
+        if (response?.status == "error") {
+          messageApi.open({
+            type: 'error',
+            content: response?.message,
+          });
+          onError?.(response);
+          return;
+        }
         onSuccess?.(response);
         if (response.length == 0) {
           messageApi.open({
@@ -205,13 +224,13 @@ function Home() {
               <p style={{marginBottom: 24}}>
                 Upload image for automatic tagging, your image will be stored in the cloud public to other user for future use.
               </p>
-              <Dragger customRequest={uploadRequest} style={{width: 400}}>
+              <Dragger customRequest={uploadRequest} style={{width: 400}} beforeUpload={checkImage}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">Click or drag file to this area to upload</p>
                 <p className="ant-upload-hint">
-                  5MB Max, Image Will Automatically Be Stored And Tagged
+                  2MB Max, Image Will Automatically Be Stored And Tagged
                 </p>
               </Dragger>
             </div>
@@ -224,13 +243,13 @@ function Home() {
               <p style={{marginBottom: 24}}>
                 Search image by uploading an image, the image will not be stored in the cloud.
               </p>
-              <Dragger customRequest={searchRequest} style={{width: 400}}>
+              <Dragger customRequest={searchRequest} style={{width: 400}} beforeUpload={checkImage}>
                 <p className="ant-upload-drag-icon">
                   <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">Click or drag file to this area to upload</p>
                 <p className="ant-upload-hint">
-                  5MB Max, Image Will Not Be Stored
+                  2MB Max, Image Will Not Be Stored
                 </p>
               </Dragger>
             </div>
